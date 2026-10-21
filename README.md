@@ -5,7 +5,7 @@
 
 ---
 
-## 🛡️ Architecture & Core Components
+##  Architecture & Core Components
 
 ```
                    ┌──────────────────────────────────────────────┐
@@ -46,7 +46,7 @@
 
 ---
 
-## 🚀 Key Features
+##  Key Features
 
 1. **Institutional Security Dashboard**:
    - Premium minimalist black design system (`#050505`, `#0A0A0A`, `#101010`, `#242424`), clean sans-serif typography, tabular numerals, monochrome SVG iconography, and responsive controls.
@@ -151,7 +151,7 @@ CHALLENGE_VERIFY_MODE=stt
 
 ---
 
-## 🏃 Running the Application
+##  Running the Application
 
 ### Single Command (FastAPI serves both API and Frontend):
 
@@ -164,7 +164,7 @@ uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
 Open your browser and navigate to:  
-👉 **`http://localhost:8000`**
+ **`http://localhost:8000`**
 
 ---
 
@@ -202,29 +202,6 @@ Test coverage includes:
 > [!NOTE]  
 > In DEMO mode, ALIBI runs 100% offline without requiring external API keys or network requests. In LIVE mode, requests are securely routed through server-side handlers to `platform.detectif.ai` with client-masked credentials.
 
----
 
-## 🎯 Hackathon Presentation Demo Script (4 Minutes)
 
-1. **Overview Dashboard**:
-   - Point out the active mode badge (`DEMO SIMULATION`). Show that the system is armed with Aletheia and Eidos zero-trust policies.
-2. **Scenario 1: AI Voice Deepfake Interception**:
-   - Navigate to **Voice Verification**.
-   - Click preset chip: `1. AI Voice Clone (Block)`.
-   - Show that Aletheia flags the synthetic artifacts (`Score: 0.988`). The decision engine immediately halts verification and blocks the authorization.
-   - Click `File to r/VoiceThreatNet` to demonstrate community threat sharing.
-3. **Scenario 2: Genuine Executive + Dynamic Liveness**:
-   - Click preset chip: `2. Genuine + Match (Approve)`.
-   - Show how authentic acoustics, biometric voiceprint match, and dynamic challenge phrase all pass, yielding an `APPROVED` verdict.
-4. **Scenario 3: Phantom Mode Bank Simulator**:
-   - Navigate to **Transaction Simulator**.
-   - Submit the $250,000 wire transfer while an attack is detected.
-   - Show the **dual view**:
-     - *Attacker View*: Receives a believable green **Decoy Phantom Receipt** with a fake wire confirmation ref to delay discovery.
-     - *SOC Internal View*: Vault status switches to `EMERGENCY_LOCKDOWN`, and funds remain 100% safe inside the vault.
-5. **Scenario 4: Threat Intelligence Feed**:
-   - Navigate to **r/VoiceThreatNet**.
-   - Show Reddit-style cards, filter by severity, upvote a report, and click `Verify SOC` to moderate a community incident.
-6. **Scenario 5: Audit History**:
-   - Navigate to **Audit History**.
-   - Filter by `BLOCKED`, click `Inspect` to show full forensic JSON telemetry, and click `Export Audit (CSV)` to download the security event log.
+ 
