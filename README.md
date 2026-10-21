@@ -88,7 +88,7 @@
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Backend**: Python 3.14+, FastAPI, Starlette, Uvicorn, SQLite, HTTPX, Pydantic, Pytest.
 - **Frontend**: Vanilla HTML5/CSS3/JavaScript (No complex build step, lightweight, low-latency, responsive).
@@ -96,7 +96,7 @@
 
 ---
 
-## 📋 Installation & Setup
+## Installation & Setup
 
 ### 1. Prerequisites
 - Python 3.10+ (tested on Python 3.14)
@@ -168,7 +168,7 @@ Open your browser and navigate to:
 
 ---
 
-## 🧪 Running Tests
+## Running Tests
 
 The test suite thoroughly covers all decision matrix branches, failure modes, and API routes:
 
