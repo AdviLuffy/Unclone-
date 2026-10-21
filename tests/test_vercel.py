@@ -57,3 +57,29 @@ def test_serverless_env_reload(monkeypatch, tmp_path):
     s = cfg.reload_settings()
     assert s.detectif_api_key == "test_serverless_key_12345678"
     assert s.has_api_key is True
+
+def test_vercel_json_rewrites():
+    """Verify vercel.json structure, function includes, and rewrite rules."""
+    import json
+    vercel_cfg_path = Path(__file__).resolve().parent.parent / "vercel.json"
+    assert vercel_cfg_path.exists()
+    with open(vercel_cfg_path, "r", encoding="utf-8") as f:
+        cfg = json.load(f)
+    
+    assert "rewrites" in cfg
+    rewrites = cfg["rewrites"]
+    sources = [r["source"] for r in rewrites]
+    destinations = [r["destination"] for r in rewrites]
+
+    # Verify critical rewrites are present
+    assert "/api/(.*)" in sources
+    assert "/" in sources
+    assert "/static/(.*)" in sources
+    assert "/api/index.py" in destinations
+    assert "/frontend/index.html" in destinations
+
+    # Verify functions includes
+    assert "functions" in cfg
+    assert "api/index.py" in cfg["functions"]
+    assert cfg["functions"]["api/index.py"]["includeFiles"] == "frontend/**"
+

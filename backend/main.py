@@ -49,13 +49,31 @@ app.include_router(threats.router)
 app.include_router(audit.router)
 
 # Mount Frontend Static Assets
-frontend_dir = Path(__file__).parent.parent / "frontend"
-if frontend_dir.exists():
+candidate_frontend_dirs = [
+    Path(__file__).resolve().parent.parent / "frontend",
+    Path.cwd() / "frontend",
+    Path("/var/task/frontend")
+]
+frontend_dir = None
+for candidate in candidate_frontend_dirs:
+    if candidate.exists() and (candidate / "index.html").exists():
+        frontend_dir = candidate
+        break
+
+if frontend_dir:
     app.mount("/static", StaticFiles(directory=str(frontend_dir)), name="static")
 
     @app.get("/")
     def serve_index():
         return FileResponse(frontend_dir / "index.html")
+else:
+    @app.get("/")
+    def serve_fallback_index():
+        for candidate in candidate_frontend_dirs:
+            p = candidate / "index.html"
+            if p.exists():
+                return FileResponse(p)
+        return {"status": "ALIBI Voice Security Engine Online", "mode": settings.mode}
 
 if __name__ == "__main__":
     import uvicorn
