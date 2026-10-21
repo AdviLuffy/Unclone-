@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 from pathlib import Path
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -27,7 +27,9 @@ app = FastAPI(
     title=settings.app_name,
     version=settings.version,
     description="ALIBI - Voice Fraud Detection & Secure Authorization Engine",
-    lifespan=lifespan
+    lifespan=lifespan,
+    docs_url="/docs",
+    openapi_url="/openapi.json"
 )
 
 # CORS Middleware
@@ -39,7 +41,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Register API Routers
+# Register API Routers (all start with /api)
 app.include_router(system.router)
 app.include_router(speakers.router)
 app.include_router(challenges.router)
@@ -48,32 +50,55 @@ app.include_router(simulator.router)
 app.include_router(threats.router)
 app.include_router(audit.router)
 
-# Mount Frontend Static Assets
-candidate_frontend_dirs = [
+# Compatibility direct routes (for environments that route /health or /config directly)
+@app.get("/health", tags=["System & Config"], include_in_schema=False)
+def direct_health():
+    return system.get_health()
+
+@app.get("/config", tags=["System & Config"], include_in_schema=False)
+def direct_config():
+    return system.get_config()
+
+# Dual docs endpoints (/docs and /api/docs)
+@app.get("/api/docs", include_in_schema=False)
+def serve_api_docs():
+    from fastapi.openapi.docs import get_swagger_ui_html
+    return get_swagger_ui_html(openapi_url="/api/openapi.json", title=settings.app_name + " - API Docs")
+
+@app.get("/api/openapi.json", include_in_schema=False)
+def serve_api_openapi():
+    return app.openapi()
+
+# Frontend Static Assets & Root Handler (for local development or direct serverless execution)
+candidate_static_dirs = [
+    Path(__file__).resolve().parent.parent / "public" / "static",
     Path(__file__).resolve().parent.parent / "frontend",
-    Path.cwd() / "frontend",
-    Path("/var/task/frontend")
+    Path.cwd() / "public" / "static",
+    Path.cwd() / "frontend"
 ]
-frontend_dir = None
-for candidate in candidate_frontend_dirs:
-    if candidate.exists() and (candidate / "index.html").exists():
-        frontend_dir = candidate
+static_dir = None
+for c in candidate_static_dirs:
+    if c.exists():
+        static_dir = c
         break
 
-if frontend_dir:
-    app.mount("/static", StaticFiles(directory=str(frontend_dir)), name="static")
+if static_dir:
+    app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
-    @app.get("/")
-    def serve_index():
-        return FileResponse(frontend_dir / "index.html")
-else:
-    @app.get("/")
-    def serve_fallback_index():
-        for candidate in candidate_frontend_dirs:
-            p = candidate / "index.html"
-            if p.exists():
-                return FileResponse(p)
-        return {"status": "ALIBI Voice Security Engine Online", "mode": settings.mode}
+candidate_index_files = [
+    Path(__file__).resolve().parent.parent / "public" / "index.html",
+    Path(__file__).resolve().parent.parent / "frontend" / "index.html",
+    Path.cwd() / "public" / "index.html",
+    Path.cwd() / "frontend" / "index.html"
+]
+
+@app.get("/")
+@app.get("/index.html")
+def serve_root():
+    for f in candidate_index_files:
+        if f.exists():
+            return FileResponse(f)
+    return {"status": "ALIBI Voice Security Engine Online", "mode": settings.mode}
 
 if __name__ == "__main__":
     import uvicorn

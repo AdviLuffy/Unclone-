@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ALIBI — Voice Security for High-Value Authorization</title>
+  <link rel="stylesheet" href="/static/css/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23F5F5F5'><path d='M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-1 6h2v6h-2V7zm0 8h2v2h-2v-2z'/></svg>">
+</head>
+<body>
+
+  <!-- Top Ambient Header -->
+  <header class="site-nav-header">
+    <div class="nav-brand-area" onclick="exitSecurityConsole()">
+      <span class="nav-brand-title">ALIBI</span>
+    </div>
+
+    <div class="nav-meta-controls">
+      <!-- Environment Mode Indicator -->
+      <div class="mode-pill-box">
+        <span id="currentModeBadge" class="mode-badge demo">
+          <span class="status-dot"></span>
+          <span id="currentModeText">DEMO SIMULATION</span>
+        </span>
+        <button id="btnHeaderToggleMode" class="btn-toggle-mode" title="Toggle between DEMO and LIVE API">Switch to LIVE</button>
+      </div>
+
+      <!-- DetectifAI Platform Connection Status -->
+      <div class="api-status-pill" id="apiTelemetryStatus" title="DetectifAI Platform Connection">
+        <span class="circle yellow" id="apiStatusCircle"></span>
+        <span id="apiStatusText">DetectifAI: Ready (Demo)</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ====================================================================
+       FLOATING BOTTOM NAVIGATION DOCK (Direct from Reference Video)
+       ==================================================================== -->
+  <nav class="floating-dock-container" aria-label="Quick Access Dock" id="floatingDock">
+    <div class="floating-dock">
+      <!-- Home / Overview -->
+      <button class="dock-btn active" id="dockBtnHome" onclick="handleDockNav('home')" aria-label="Home">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span class="dock-tooltip">Overview</span>
+      </button>
+
+      <!-- How it Works -->
+      <button class="dock-btn" id="dockBtnWorkflow" onclick="handleDockNav('how-it-works')" aria-label="Workflow">
+        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <span class="dock-tooltip">Architecture</span>
+      </button>
+
+      <div class="dock-divider"></div>
+
+      <!-- Voice Verification Studio -->
+      <button class="dock-btn" id="dockBtnVerify" onclick="handleDockNav('verify')" aria-label="Voice Verification">
+        <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        <span class="dock-tooltip">Voice Studio</span>
+      </button>
+
+      <!-- Transaction Simulator -->
+      <button class="dock-btn" id="dockBtnSimulator" onclick="handleDockNav('simulator')" aria-label="Transaction Simulator">
+        <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        <span class="dock-tooltip">Simulator</span>
+      </button>
+
+      <!-- Threat Intelligence (r/VoiceThreatNet) -->
+      <button class="dock-btn" id="dockBtnThreats" onclick="handleDockNav('threats')" aria-label="Threat Feed">
+        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span class="dock-tooltip">Threat Feed</span>
+      </button>
+
+      <!-- Audit History -->
+      <button class="dock-btn" id="dockBtnAudit" onclick="handleDockNav('audit')" aria-label="Audit History">
+        <svg viewBox="0 0 24 24"><polyline points="14 2 14 8 20 8"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/><path d="M4 22h16a2 2 0 0 0 2-2V7.5L14.5 2H4a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2z"/></svg>
+        <span class="dock-tooltip">Audit Log</span>
+      </button>
+
+      <div class="dock-divider"></div>
+
+      <!-- Security Console Toggle -->
+      <button class="dock-btn" id="dockBtnConsoleToggle" onclick="toggleSecurityConsoleView()" aria-label="Toggle Console">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+        <span class="dock-tooltip" id="dockConsoleToggleLabel">Console</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ====================================================================
+       TIER 1: EDITORIAL IMMERSIVE LANDING EXPERIENCE (Reference Design)
+       ==================================================================== -->
+  <div id="view-landing" class="landing-view-wrapper">
+
+    <!-- Section 1: Hero -->
+    <section class="hero-section" id="hero">
+      <div class="hero-content">
+        <div class="hero-eyebrow">Zero-Trust Voice Firewall</div>
+
+        <!-- Distinctive kinetic typography title -->
+        <h1 class="hero-title" id="kineticAlibiTitle" aria-label="ALIBI">
+          <span class="letter">A</span>
+          <span class="letter">L</span>
+          <span class="letter">I</span>
+          <span class="letter">B</span>
+          <span class="letter">I</span>
+        </h1>
+
+        <div class="hero-subtitle">Voice security for high-value authorization.</div>
+        <p class="hero-desc">Verify the voice. Confirm the identity. Protect the transaction.</p>
+
+        <div class="hero-cta-group">
+          <a href="#problem" class="btn-pill primary">Explore ALIBI</a>
+          <button class="btn-pill secondary" onclick="openSecurityConsole('page-overview')">
+            Open Security Console
+          </button>
+        </div>
+      </div>
+
+      <!-- Vertical Scroll Indicator -->
+      <a href="#problem" class="hero-scroll-indicator" aria-label="Scroll to learn more">
+        <span class="scroll-text">Scroll</span>
+        <div class="scroll-line"></div>
+      </a>
+    </section>
+
+    <!-- Section 2: The Problem -->
+    <section class="editorial-section" id="problem">
+      <div class="section-divider"></div>
+      <div class="section-eyebrow">The Threat Vector</div>
+      <h2 class="section-heading">Trust the voice.<br>Verify the person.</h2>
+      <p class="section-description">
+        Generative voice cloning has weaponized executive communications. Using under three seconds of reference audio, attackers synthesize convincing vocal replicas of corporate signatories to initiate fraudulent wire settlements and breach high-value systems.
+      </p>
+
+      <div class="feature-split-grid">
+        <div class="panel" style="background:#090909;">
+          <h3 style="font-size:1.05rem; font-weight:600; margin-bottom:8px;">Synthetic Voice Injection</h3>
+          <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.5;">
+            Fine-tuned neural vocoders mimic vocal cadence, intonation, and breath patterns with high fidelity, rendering traditional phone authorization insecure.
+          </p>
+        </div>
+        <div class="panel" style="background:#090909;">
+          <h3 style="font-size:1.05rem; font-weight:600; margin-bottom:8px;">Audio Replay & Spoofing</h3>
+          <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.5;">
+            Even genuine audio can be harvested from public earnings calls or media appearances. Without dynamic spoken challenge verification, recorded clips bypass biometric matchers.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: How ALIBI Works -->
+    <section class="editorial-section" id="how-it-works">
+      <div class="section-divider"></div>
+      <div class="section-eyebrow">Zero-Trust Pipeline</div>
+      <h2 class="section-heading">Three checks.<br>One decision.</h2>
+      <p class="section-description">
+        ALIBI requires every authorization attempt to satisfy three independent layers of verification. Neither genuine acoustics nor speaker resemblance alone is sufficient.
+      </p>
+
+      <div class="sequence-grid">
+        <div class="sequence-card">
+          <div class="sequence-number">01 // DETECTION</div>
+          <h3 class="sequence-title">Aletheia Deepfake Engine</h3>
+          <p class="sequence-desc">
+            Analyzes acoustic fingerprints, phase inconsistencies, and synthetic generation artifacts. FAKE audio triggers an immediate block and incident containment.
+          </p>
+        </div>
+
+        <div class="sequence-card">
+          <div class="sequence-number">02 // BIOMETRICS</div>
+          <h3 class="sequence-title">Eidos Voice Biometrics</h3>
+          <p class="sequence-desc">
+            Matches speaker acoustic vectors against enrolled executive profiles. Genuine human speech that fails identity matching is blocked as an impostor.
+          </p>
+        </div>
+
+        <div class="sequence-card">
+          <div class="sequence-number">03 // LIVENESS</div>
+          <h3 class="sequence-title">Dynamic Nonce Challenge</h3>
+          <p class="sequence-desc">
+            Enforces a fresh, cryptographically generated spoken phrase evaluated via real-time speech recognition to guarantee caller presence and eliminate replays.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: Security Experience (Showcase Cards inspired by Reference Image 3) -->
+    <section class="editorial-section" id="experience">
+      <div class="section-divider"></div>
+      <div class="section-eyebrow">Operational Modules</div>
+      <h2 class="section-heading">Built for high-stakes decisions.</h2>
+      <p class="section-description">
+        Engineered for financial institutions, treasury desks, and executive signatories where a single voice authorization moves millions in capital.
+      </p>
+
+      <div class="showcase-grid">
+        <!-- Voice Studio Showcase -->
+        <div class="showcase-card">
+          <div>
+            <div class="showcase-tag-row">
+              <span class="showcase-tag">Interactive</span>
+              <span class="showcase-tag">MediaRecorder</span>
+              <span class="showcase-tag">Aletheia & Eidos</span>
+            </div>
+            <h3 class="showcase-title">Voice Verification Studio</h3>
+            <p class="showcase-desc">
+              Live microphone capture with real-time waveform visualization, dynamic challenge nonces, and full multi-factor breakdown.
+            </p>
+          </div>
+          <button class="showcase-action-btn" onclick="openSecurityConsole('page-verify')">
+            Launch Voice Studio &rarr;
+          </button>
+        </div>
+
+        <!-- Biometric Enrollment Showcase -->
+        <div class="showcase-card">
+          <div>
+            <div class="showcase-tag-row">
+              <span class="showcase-tag">Biometrics</span>
+              <span class="showcase-tag">Consent-Enforced</span>
+              <span class="showcase-tag">Eidos API</span>
+            </div>
+            <h3 class="showcase-title">Speaker Enrollment</h3>
+            <p class="showcase-desc">
+              Register executive voice profiles with documented consent, audio duration validation, and active directory management.
+            </p>
+          </div>
+          <button class="showcase-action-btn" onclick="openSecurityConsole('page-enrollment')">
+            Manage Profiles &rarr;
+          </button>
+        </div>
+
+        <!-- Simulator & Phantom Mode Showcase -->
+        <div class="showcase-card">
+          <div>
+            <div class="showcase-tag-row">
+              <span class="showcase-tag">Treasury Sandbox</span>
+              <span class="showcase-tag">Deceptive Defense</span>
+              <span class="showcase-tag">FedWire Decoy</span>
+            </div>
+            <h3 class="showcase-title">Transaction Simulator & Phantom Mode</h3>
+            <p class="showcase-desc">
+              Simulate high-value wire transfers. Suspicious calls trigger deceptive Phantom Mode decoy receipts while locking internal vaults.
+            </p>
+          </div>
+          <button class="showcase-action-btn" onclick="openSecurityConsole('page-simulator')">
+            Open Simulator &rarr;
+          </button>
+        </div>
+
+        <!-- Threat Intelligence Showcase -->
+        <div class="showcase-card">
+          <div>
+            <div class="showcase-tag-row">
+              <span class="showcase-tag">Consortium Intel</span>
+              <span class="showcase-tag">r/VoiceThreatNet</span>
+              <span class="showcase-tag">SOC Moderation</span>
+            </div>
+            <h3 class="showcase-title">Threat Intelligence Feed</h3>
+            <p class="showcase-desc">
+              Community telemetry for synthetic voice fraud incidents, acoustic signatures, and community peer review.
+            </p>
+          </div>
+          <button class="showcase-action-btn" onclick="openSecurityConsole('page-threats')">
+            Explore Feed &rarr;
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 5: Threat Intelligence Preview -->
+    <section class="editorial-section" id="threat-intel">
+      <div class="section-divider"></div>
+      <div class="section-eyebrow">Consortium Telemetry</div>
+      <h2 class="section-heading">Every signal matters.</h2>
+      <p class="section-description">
+        r/VoiceThreatNet aggregates live and simulated forensic indicators across voice cloning campaigns, neural vocoder glitches, and impostor attempts.
+      </p>
+
+      <div class="panel" style="background:#0A0A0A;">
+        <div class="panel-header">
+          <div class="panel-title">Latest Intelligence Dispatches</div>
+          <button class="btn btn-secondary btn-sm" onclick="openSecurityConsole('page-threats')">Open Complete Feed</button>
+        </div>
+        <div id="landingThreatFeedPreview">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 6: Closing CTA -->
+    <section class="editorial-section" id="closing">
+      <div class="closing-card">
+        <div class="section-eyebrow" style="color:var(--text-muted); margin-bottom:8px;">Ready to Authenticate</div>
+        <h2 class="closing-title">Make every voice prove itself.</h2>
+        <p class="closing-desc">
+          Test the live voice verification pipeline, simulate deceptive wire protection, or explore the persistent audit trail.
+        </p>
+        <button class="btn-pill primary" onclick="openSecurityConsole('page-verify')">
+          Enter Security Console
+        </button>
+      </div>
+    </section>
+
+    <!-- Site Footer -->
+    <footer class="site-footer">
+      <div>ALIBI &bull; Voice Security for High-Value Authorization &bull; Powered by DetectifAI</div>
+      <div style="margin-top:6px; color:var(--text-dim);">
+        <a href="#hero">Overview</a> &bull; 
+        <a href="#how-it-works">Architecture</a> &bull; 
+        <a href="javascript:void(0)" onclick="openSecurityConsole('page-settings')">System Settings</a>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- ====================================================================
+       TIER 2: OPERATIONAL SECURITY CONSOLE (Full Working Capabilities)
+       ==================================================================== -->
+  <div id="view-console" class="console-view-wrapper">
+    <div style="max-width: 1240px; margin: 0 auto; padding: 0 24px;">
+
+      <!-- Console Header Bar -->
+      <div class="console-header-bar">
+        <div class="console-brand-box">
+          <span style="font-weight:700; font-size:0.9rem; letter-spacing:0.08em; text-transform:uppercase;">ALIBI // SECURITY CONSOLE</span>
+          <span class="badge badge-simulated" id="consoleModePill">DEMO SIMULATION</span>
+        </div>
+        <button class="btn-exit-console" onclick="exitSecurityConsole()">
+          <svg viewBox="0 0 24 24" style="width:13px; height:13px; stroke:currentColor; fill:none; stroke-width:2;"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          Return to Overview
+        </button>
+      </div>
+
+      <!-- Secondary Console Tabs -->
+      <nav class="console-tabs-row" aria-label="Console Sections">
+        <button class="console-tab active" data-page="page-overview">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Overview
+        </button>
+        <button class="console-tab" data-page="page-verify">
+          <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          Voice Verification
+        </button>
+        <button class="console-tab" data-page="page-enrollment">
+          <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Speaker Enrollment
+        </button>
+        <button class="console-tab" data-page="page-simulator">
+          <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          Transaction Simulator
+        </button>
+        <button class="console-tab" data-page="page-threats">
+          <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          r/VoiceThreatNet
+        </button>
+        <button class="console-tab" data-page="page-audit">
+          <svg viewBox="0 0 24 24"><polyline points="14 2 14 8 20 8"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/><path d="M4 22h16a2 2 0 0 0 2-2V7.5L14.5 2H4a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2z"/></svg>
+          Audit History
+        </button>
+        <button class="console-tab" data-page="page-settings">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Settings
+        </button>
+      </nav>
+
+      <!-- CONSOLE SUB-PAGES -->
+
+      <!-- 1. Console Overview -->
+      <section id="page-overview" class="console-subpage active">
+        <div class="metrics-row">
+          <div class="metric-item">
+            <div class="metric-header">
+              <span class="metric-label">Security Status</span>
+              <span class="badge badge-approved">Active</span>
+            </div>
+            <div class="metric-value tabular" style="color:var(--success);">PROTECTED</div>
+            <div class="metric-meta">Aletheia & Eidos zero-trust active</div>
+          </div>
+
+          <div class="metric-item">
+            <div class="metric-header">
+              <span class="metric-label">Simulated Reserves Protected</span>
+              <span class="badge badge-simulated">Demo Data</span>
+            </div>
+            <div class="metric-value tabular" id="statFundsProtected">$700,000</div>
+            <div class="metric-meta">Preserved via Phantom Mode lock</div>
+          </div>
+
+          <div class="metric-item">
+            <div class="metric-header">
+              <span class="metric-label">Threats Intercepted</span>
+              <span class="badge badge-simulated">Demo Data</span>
+            </div>
+            <div class="metric-value tabular" id="statDeepfakesIntercepted">14</div>
+            <div class="metric-meta">Synthetic deepfakes & replays blocked</div>
+          </div>
+
+          <div class="metric-item">
+            <div class="metric-header">
+              <span class="metric-label">Enrolled Voice Profiles</span>
+              <span class="badge badge-simulated">Registry</span>
+            </div>
+            <div class="metric-value tabular" id="statEnrolledSpeakers">3 Profiles</div>
+            <div class="metric-meta">Authorized executive voiceprints</div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">Recent Threat Interceptions</div>
+              <button class="btn btn-secondary btn-sm" onclick="navigateToPage('page-threats')">View Feed</button>
+            </div>
+            <div id="overviewThreatSnippets">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">Detection Engine Configuration</div>
+              <button class="btn btn-secondary btn-sm" onclick="navigateToPage('page-settings')">Manage</button>
+            </div>
+            <table class="data-table">
+              <tbody>
+                <tr>
+                  <td>Operating Mode</td>
+                  <td><span id="overviewModeText" class="badge badge-simulated">DEMO SIMULATION</span></td>
+                </tr>
+                <tr>
+                  <td>DetectifAI Base URL</td>
+                  <td><code id="overviewBaseUrl" class="mono">https://platform.detectif.ai</code></td>
+                </tr>
+                <tr>
+                  <td>Deepfake Endpoint</td>
+                  <td><code class="mono">POST /v1/deepfake/detect</code></td>
+                </tr>
+                <tr>
+                  <td>Speaker Endpoints</td>
+                  <td><code class="mono">/v1/speakers/enroll, /verify</code></td>
+                </tr>
+                <tr>
+                  <td>Biometric Cutoff</td>
+                  <td><span class="tabular">0.70</span> (Cosine Similarity)</td>
+                </tr>
+                <tr>
+                  <td>Challenge Protocol</td>
+                  <td>Speech Recognition (ASR)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. Voice Verification Studio -->
+      <section id="page-verify" class="console-subpage">
+        <div class="scenario-selector-bar">
+          <span style="font-size:0.75rem; font-weight:600; color:var(--text-muted); text-transform:uppercase;">Seeded Presets:</span>
+          <div class="scenario-chips-row">
+            <button class="scenario-chip" onclick="loadScenario('ai_clone')">1. AI Voice Clone (Block)</button>
+            <button class="scenario-chip" onclick="loadScenario('genuine_approved')">2. Genuine + Match (Approve)</button>
+            <button class="scenario-chip" onclick="loadScenario('human_impostor')">3. Human Impostor (Block)</button>
+            <button class="scenario-chip" onclick="loadScenario('inconclusive')">4. Inconclusive (Step-Up)</button>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <!-- Controls Column -->
+          <div>
+            <div class="panel">
+              <div class="panel-header">
+                <div class="panel-title">1. Claimed Speaker Identity</div>
+                <span class="badge badge-simulated" id="verifyModeBadge">DEMO MODE ACTIVE</span>
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" for="verifySpeakerSelect">Enrolled Profile</label>
+                <select id="verifySpeakerSelect" class="form-select">
+                  <!-- Dynamically populated -->
+                </select>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-header">
+                <div class="panel-title">2. Dynamic Liveness Challenge</div>
+                <button class="btn btn-secondary btn-sm" id="btnRefreshChallenge">Refresh Nonce</button>
+              </div>
+              <p style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:8px;">
+                The speaker must repeat this fresh phrase to prove live caller presence and eliminate replays.
+              </p>
+              <div class="challenge-phrase-display mono" id="challengeDisplayPhrase">
+                Delta Falcon 4892 authorize transfer
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.72rem; color:var(--text-muted);">
+                <span id="challengeMetaInfo" class="mono">Nonce: CHAL-928172</span>
+                <span class="badge badge-simulated" id="challengeValidationModeBadge">Automated Speech Recognition</span>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-header">
+                <div class="panel-title">3. Acoustic Sample Capture</div>
+                <span id="recordingLengthConfig" class="badge badge-low">Max 15s</span>
+              </div>
+
+              <div class="recorder-box">
+                <canvas id="visualizerCanvas" class="audio-visualizer-canvas" width="500" height="60"></canvas>
+                <div class="recorder-timer tabular" id="recordingTimer">00:00</div>
+                <div class="recorder-status-text" id="recordingStatusText">
+                  Microphone idle. Click Start Recording to authorize.
+                </div>
+
+                <div id="audioPlaybackContainer" style="display:none; margin-bottom:14px;">
+                  <audio id="audioPlayback" controls style="width:100%; max-width:380px;"></audio>
+                </div>
+
+                <div class="recorder-controls">
+                  <button id="btnStartRecord" class="btn btn-secondary">Start Recording</button>
+                  <button id="btnStopRecord" class="btn btn-danger" style="display:none;">Stop Recording</button>
+                  <button id="btnRetryRecord" class="btn btn-secondary" style="display:none;">Retry</button>
+                  <button id="btnExecuteVerify" class="btn btn-primary" style="display:none;">Run Verification</button>
+                </div>
+
+                <div style="margin-top:14px; border-top:1px solid var(--border-subtle); padding-top:12px;">
+                  <label for="audioFileInput" style="font-size:0.72rem; color:var(--text-muted); cursor:pointer;">
+                    Upload audio sample (.wav, .mp3, .webm):
+                  </label>
+                  <input type="file" id="audioFileInput" accept="audio/*" style="display:block; margin:6px auto 0; font-size:0.75rem; color:var(--text-muted);">
+                </div>
+              </div>
+
+              <div style="margin-top:14px;">
+                <label class="form-label" for="transcriptionInput">Captured Spoken Transcription (Speech-to-Text)</label>
+                <input type="text" id="transcriptionInput" class="form-control" placeholder="Awaiting speech or type transcription...">
+                <div style="display:flex; justify-content:space-between; margin-top:4px; font-size:0.7rem; color:var(--text-dim);">
+                  <span>Transcribed via Web Speech API / Manual fallback</span>
+                  <span id="sttStatusIndicator">STT: Standby</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Decision Column -->
+          <div>
+            <div class="panel" style="min-height: 480px;">
+              <div class="panel-header">
+                <div class="panel-title">Authorization Decision</div>
+                <span id="verifIncidentIdBadge" class="badge badge-low mono">INC-STANDBY</span>
+              </div>
+
+              <div id="decisionPlaceholder" style="text-align:center; padding:50px 20px; color:var(--text-dim);">
+                <p style="font-weight:600; color:var(--text-secondary); margin-bottom:6px;">Pipeline Ready</p>
+                <p style="font-size:0.78rem; max-width:320px; margin:0 auto; color:var(--text-muted);">
+                  Record audio or click a Seeded Preset to execute Aletheia deepfake detection and Eidos biometric verification.
+                </p>
+              </div>
+
+              <div id="decisionCard" class="decision-card" style="display:none;">
+                <div class="decision-banner">
+                  <div>
+                    <span class="badge" id="decisionProvenanceBadge">SIMULATED</span>
+                    <div class="decision-title" id="decisionTitleText">
+                      <span id="decisionIcon"></span>
+                      <span id="decisionOutcomeText">BLOCKED</span>
+                    </div>
+                  </div>
+                  <div id="decisionActionArea"></div>
+                </div>
+
+                <p id="decisionReasonText" style="font-size:0.84rem; color:var(--text-primary); line-height:1.45; margin-bottom:14px;">
+                  AI-generated synthetic voice detected by Aletheia.
+                </p>
+
+                <div class="stages-breakdown-grid">
+                  <div class="stage-pill">
+                    <div class="stage-pill-title">Aletheia Deepfake</div>
+                    <div class="stage-pill-value">
+                      <span id="stageAletheiaVerdict">FAKE</span>
+                      <span id="stageAletheiaScore" class="mono tabular">0.988</span>
+                    </div>
+                    <div class="stage-pill-detail" id="stageAletheiaDetail">Synthetic artifacts detected</div>
+                  </div>
+
+                  <div class="stage-pill">
+                    <div class="stage-pill-title">Eidos Biometrics</div>
+                    <div class="stage-pill-value">
+                      <span id="stageEidosVerdict">SKIPPED</span>
+                      <span id="stageEidosScore" class="mono tabular">--</span>
+                    </div>
+                    <div class="stage-pill-detail" id="stageEidosDetail">Halted by deepfake engine</div>
+                  </div>
+
+                  <div class="stage-pill">
+                    <div class="stage-pill-title">Dynamic Challenge</div>
+                    <div class="stage-pill-value">
+                      <span id="stageChallengeVerdict">SKIPPED</span>
+                      <span id="stageChallengeOutcome" class="mono tabular">--</span>
+                    </div>
+                    <div class="stage-pill-detail" id="stageChallengeDetail">Liveness check bypassed</div>
+                  </div>
+                </div>
+
+                <div style="background:var(--bg-subtle); border:1px solid var(--border-subtle); border-radius:var(--radius-xs); padding:10px 12px; font-size:0.72rem; color:var(--text-muted);">
+                  <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                    <span>Aletheia Req ID: <span id="telemetryAletheiaReqId" class="mono">--</span></span>
+                    <span>Eidos Req ID: <span id="telemetryEidosReqId" class="mono">--</span></span>
+                  </div>
+                  <div>
+                    Target Speaker: <span id="telemetryTargetSpeaker" style="color:var(--text-secondary);">--</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Speaker Enrollment -->
+      <section id="page-enrollment" class="console-subpage">
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">Register Voiceprint Profile</div>
+              <span class="badge badge-simulated" id="enrollModeBadge">DEMO MODE</span>
+            </div>
+
+            <form id="enrollmentForm">
+              <div class="form-group">
+                <label class="form-label" for="enrollName">Full Name / Display Name *</label>
+                <input type="text" id="enrollName" class="form-control" placeholder="e.g. Jonathan Vance" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="enrollRole">Corporate Title / Authorization Role</label>
+                <input type="text" id="enrollRole" class="form-control" placeholder="e.g. Chief Financial Officer">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="enrollNotes">Operational Notes</label>
+                <input type="text" id="enrollNotes" class="form-control" placeholder="e.g. Authorized for transfers > $250k">
+              </div>
+
+              <div class="form-group" style="background:var(--bg-subtle); border:1px solid var(--border-subtle); padding:12px; border-radius:var(--radius-xs);">
+                <label class="form-checkbox-label">
+                  <input type="checkbox" id="enrollConsent" required>
+                  <span>
+                    <strong>Biometric Consent Confirmation:</strong> I confirm that the speaker has provided explicit consent to have their voice sample recorded, processed, and stored for voice identity verification pursuant to biometric security policies.
+                  </span>
+                </label>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Voice Sample Audio Recording *</label>
+                <p style="font-size:0.72rem; color:var(--text-muted); margin-bottom:8px;">
+                  Record or upload an enrollment sample. (Eidos requires 15–60s with &ge;10s active speech in Live mode; demo accepts immediate sample).
+                </p>
+
+                <div class="recorder-box" style="padding:14px;">
+                  <div class="recorder-timer tabular" id="enrollTimer" style="font-size:1.4rem;">00:00</div>
+                  <div class="recorder-controls">
+                    <button type="button" id="btnEnrollRecord" class="btn btn-secondary btn-sm">Record Sample</button>
+                    <button type="button" id="btnEnrollStop" class="btn btn-danger btn-sm" style="display:none;">Stop</button>
+                  </div>
+                  <audio id="enrollAudioPreview" controls style="display:none; width:100%; margin-top:8px;"></audio>
+                  <div style="margin-top:8px;">
+                    <span style="font-size:0.72rem; color:var(--text-muted);">Or upload file: </span>
+                    <input type="file" id="enrollFileInput" accept="audio/*" style="font-size:0.72rem;">
+                  </div>
+                </div>
+              </div>
+
+              <button type="submit" id="btnSubmitEnrollment" class="btn btn-primary" style="width:100%;">
+                Register Speaker Voiceprint
+              </button>
+            </form>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">Active Biometric Profiles</div>
+              <button class="btn btn-secondary btn-sm" id="btnRefreshSpeakers">Refresh</button>
+            </div>
+            <p style="font-size:0.78rem; color:var(--text-secondary); margin-bottom:12px;">
+              Active profiles registered for zero-trust authorization.
+            </p>
+            <div id="speakerDirectoryList" class="speaker-cards-grid"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. Transaction Simulator -->
+      <section id="page-simulator" class="console-subpage">
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">Outbound Wire Transfer</div>
+            </div>
+
+            <form id="wireTransferForm">
+              <div class="form-group">
+                <label class="form-label" for="wireBeneficiaryName">Beneficiary Name / Entity</label>
+                <input type="text" id="wireBeneficiaryName" class="form-control" value="Offshore Exfiltration Shell LLC" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="wireAccount">Beneficiary IBAN / Swift Account</label>
+                <input type="text" id="wireAccount" class="form-control mono" value="SWIFT-CY-8829-1029384" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="wireBank">Beneficiary Institution</label>
+                <input type="text" id="wireBank" class="form-control" value="Cayman Syndicate Trust Bank" required>
+              </div>
+
+              <div class="grid-2" style="gap:12px; margin-bottom:14px;">
+                <div>
+                  <label class="form-label" for="wireAmount">Amount (USD)</label>
+                  <input type="number" id="wireAmount" class="form-control mono tabular" value="250000" min="1000" step="500" required>
+                </div>
+                <div>
+                  <label class="form-label" for="wireAuthorizerSelect">Required Signatory</label>
+                  <select id="wireAuthorizerSelect" class="form-select"></select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Voice Authorization Status</label>
+                <div id="simVoiceAuthStatusBox" style="background:var(--bg-subtle); border:1px solid var(--border-subtle); border-radius:var(--radius-xs); padding:10px 12px; display:flex; justify-content:space-between; align-items:center;">
+                  <div>
+                    <span id="simVoiceAuthText" style="font-weight:600; color:var(--warning); font-size:0.8rem;">Awaiting Voice Verification</span>
+                    <div style="font-size:0.7rem; color:var(--text-muted);" id="simVoiceAuthDetail">Run voice test or simulate attack below</div>
+                  </div>
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="navigateToPage('page-verify')">
+                    Voice Studio
+                  </button>
+                </div>
+              </div>
+
+              <div style="display:flex; gap:8px;">
+                <button type="submit" id="btnExecuteTransfer" class="btn btn-primary" style="flex:1;">
+                  Authorize & Dispatch Wire
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="loadScenarioAndTransfer('ai_clone')">
+                  Simulate Attack
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Dual-View -->
+          <div>
+            <div class="dual-view-container" style="grid-template-columns:1fr; gap:14px;">
+              <div class="view-panel soc">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                  <div style="font-weight:600; color:var(--text-primary); font-size:0.82rem; letter-spacing:0.02em;">
+                    Internal Vault State (SOC View)
+                  </div>
+                  <span id="socVaultStatusBadge" class="badge badge-approved">SECURE_ONLINE</span>
+                </div>
+
+                <div class="vault-security-meter">
+                  <div>
+                    <div style="font-size:0.68rem; color:var(--text-muted); text-transform:uppercase;">Vault Reserves</div>
+                    <div class="mono tabular" style="font-size:1.25rem; font-weight:600; color:var(--text-primary);" id="socVaultReserves">$10,000,000.00</div>
+                  </div>
+                  <div>
+                    <div style="font-size:0.68rem; color:var(--text-muted); text-transform:uppercase;">Funds Blocked</div>
+                    <div class="mono tabular" style="font-size:1.25rem; font-weight:600; color:var(--success);" id="socFundsBlocked">$0.00</div>
+                  </div>
+                  <button class="btn btn-secondary btn-sm" id="btnResetVault">Reset Lockdown</button>
+                </div>
+
+                <div id="socAlertBox" style="font-size:0.75rem; color:var(--text-secondary); background:var(--bg-subtle); border:1px solid var(--border-subtle); padding:10px; border-radius:var(--radius-xs);">
+                  No emergency lockdown active. Systems normal.
+                </div>
+              </div>
+
+              <div class="view-panel attacker">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                  <div style="font-weight:600; color:var(--text-secondary); font-size:0.82rem; letter-spacing:0.02em;">
+                    Caller / Attacker View
+                  </div>
+                  <span id="attackerNoticeBadge" class="badge badge-low">Awaiting Dispatch</span>
+                </div>
+
+                <div id="attackerReceiptCard" class="receipt-card" style="display:none;">
+                  <div class="phantom-watermark">[DECOY PHANTOM RECEIPT — ATTACKER VIEW]</div>
+                  <div style="border-bottom:1px solid var(--border-subtle); padding-bottom:8px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+                    <strong style="font-size:0.82rem;">APEX HORIZON TRUST // WIRE CONFIRMATION</strong>
+                    <span class="mono" id="decoyReceiptDate" style="font-size:0.7rem; color:var(--text-muted);">--</span>
+                  </div>
+                  <div style="font-size:0.78rem; margin-bottom:6px;">
+                    <span style="color:var(--text-muted);">STATUS:</span> <span id="decoyStatusText" style="color:var(--success); font-weight:600;">SETTLED / RELEASED</span>
+                  </div>
+                  <div style="font-size:0.78rem; margin-bottom:4px;">
+                    <span style="color:var(--text-muted);">WIRE REFERENCE:</span> <span id="decoyWireRef" class="mono">--</span>
+                  </div>
+                  <div style="font-size:0.78rem; margin-bottom:4px;">
+                    <span style="color:var(--text-muted);">BENEFICIARY:</span> <span id="decoyBeneficiary">--</span>
+                  </div>
+                  <div style="font-size:0.78rem; margin-bottom:8px;">
+                    <span style="color:var(--text-muted);">AMOUNT CREDITED:</span> <span id="decoyAmount" class="mono tabular" style="font-weight:600;">--</span>
+                  </div>
+                  <div style="font-size:0.68rem; color:var(--text-muted); border-top:1px dashed var(--border-subtle); padding-top:6px;">
+                    FedWire Global FastSettlement: Funds credited to destination institution.
+                  </div>
+                </div>
+
+                <div id="attackerPlaceholder" style="text-align:center; padding:24px; color:var(--text-dim); font-size:0.78rem;">
+                  No wire transfer initiated. When triggered, caller receipt renders here.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. Threat Intelligence Feed -->
+      <section id="page-threats" class="console-subpage">
+        <div class="threat-feed-header">
+          <div>
+            <div class="eyebrow-label">Threat Intelligence Feed</div>
+            <h2 style="font-size:1.15rem; color:var(--text-primary); font-weight:600; letter-spacing:-0.01em;">r/VoiceThreatNet</h2>
+            <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:2px;">
+              Consortium telemetry for voice fraud detection, synthetic audio signatures, and incident dispatches.
+            </p>
+          </div>
+          <button class="btn btn-primary" id="btnOpenNewThreatModal">Submit Threat Report</button>
+        </div>
+
+        <div class="filter-bar">
+          <input type="text" id="threatSearchInput" class="form-control" placeholder="Search incidents, audio models, or indicators..." style="max-width:320px;">
+          
+          <select id="threatFilterType" class="form-select" style="max-width:170px;">
+            <option value="all">All Attack Types</option>
+            <option value="ai_clone">AI Voice Clones</option>
+            <option value="replay">Replay Attacks</option>
+            <option value="human_impostor">Human Impostors</option>
+            <option value="unknown">Unknown</option>
+          </select>
+
+          <select id="threatFilterSeverity" class="form-select" style="max-width:150px;">
+            <option value="all">All Severities</option>
+            <option value="CRITICAL">Critical</option>
+            <option value="HIGH">High</option>
+            <option value="MEDIUM">Medium</option>
+            <option value="LOW">Low</option>
+          </select>
+
+          <select id="threatFilterStatus" class="form-select" style="max-width:170px;">
+            <option value="all">All Review Statuses</option>
+            <option value="Verified SOC Alert">Verified SOC Alert</option>
+            <option value="Pending Review">Pending Review</option>
+            <option value="Dismissed">Dismissed</option>
+          </select>
+
+          <button class="btn btn-secondary btn-sm" id="btnRefreshThreats">Refresh</button>
+        </div>
+
+        <div id="threatFeedList"></div>
+      </section>
+
+      <!-- 6. Audit History -->
+      <section id="page-audit" class="console-subpage">
+        <div class="page-header" style="border:none; padding-bottom:10px; margin-bottom:16px;">
+          <div>
+            <h2 style="font-size:1.15rem; font-weight:600;">Audit History</h2>
+            <p style="font-size:0.75rem; color:var(--text-secondary);">Chronological record of every voice verification and decision.</p>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <a href="/api/audit/export/csv" class="btn btn-secondary">Export CSV</a>
+            <button class="btn btn-secondary" id="btnRefreshAudit">Refresh</button>
+          </div>
+        </div>
+
+        <div class="filter-bar">
+          <select id="auditFilterDecision" class="form-select" style="max-width:180px;">
+            <option value="all">All Decisions</option>
+            <option value="APPROVED">APPROVED</option>
+            <option value="BLOCKED">BLOCKED</option>
+            <option value="STEP_UP_REQUIRED">STEP_UP_REQUIRED</option>
+          </select>
+
+          <select id="auditFilterMode" class="form-select" style="max-width:180px;">
+            <option value="all">All Modes</option>
+            <option value="DEMO">DEMO SIMULATION</option>
+            <option value="LIVE">LIVE API</option>
+          </select>
+        </div>
+
+        <div class="data-table-container">
+          <table class="data-table" id="auditTable">
+            <thead>
+              <tr>
+                <th>Incident ID</th>
+                <th>Timestamp</th>
+                <th>Mode</th>
+                <th>Speaker</th>
+                <th>Aletheia Verdict</th>
+                <th>Eidos Biometrics</th>
+                <th>Challenge</th>
+                <th>Final Decision</th>
+                <th>Threat Ref</th>
+                <th>Inspect</th>
+              </tr>
+            </thead>
+            <tbody id="auditTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 7. Settings -->
+      <section id="page-settings" class="console-subpage">
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">Operating Mode</div>
+            </div>
+            <p style="font-size:0.78rem; color:var(--text-secondary); margin-bottom:14px;">
+              Toggle between offline demo simulation and live external API calls to DetectifAI platform.
+            </p>
+
+            <div style="background:var(--bg-subtle); border:1px solid var(--border-subtle); padding:14px; border-radius:var(--radius-xs); margin-bottom:14px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <span style="font-size:0.8rem; font-weight:600;">Active Mode:</span>
+                <span id="settingsCurrentModeBadge" class="badge badge-simulated">DEMO SIMULATION</span>
+              </div>
+              <p style="font-size:0.72rem; color:var(--text-muted); line-height:1.4;">
+                In DEMO mode, seeded scenarios and simulated voice analysis allow presentations without network or credit dependencies. In LIVE mode, requests are dispatched to platform.detectif.ai.
+              </p>
+            </div>
+
+            <div style="display:flex; gap:8px;">
+              <button class="btn btn-secondary" id="btnSetDemoMode">Switch to DEMO</button>
+              <button class="btn btn-primary" id="btnSetLiveMode">Switch to LIVE</button>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">DetectifAI Platform Credentials</div>
+              <button class="btn btn-secondary btn-sm" id="btnTestApiConnection">Ping & Test</button>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Platform Base URL</label>
+              <input type="text" id="settingsBaseUrl" class="form-control mono" readonly value="https://platform.detectif.ai">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">API Key Status</label>
+              <input type="text" id="settingsMaskedKey" class="form-control mono" readonly value="Checking...">
+              <div style="font-size:0.7rem; color:var(--text-dim); margin-top:4px;">
+                Configured via server-side <code class="mono">DETECTIF_API_KEY</code> environment variable in <code class="mono">.env</code>.
+              </div>
+            </div>
+
+            <div id="connectionTestResultBox" style="background:var(--bg-subtle); border:1px solid var(--border-subtle); padding:10px 12px; border-radius:var(--radius-xs); font-size:0.75rem; color:var(--text-secondary);">
+              Click <strong>Ping & Test</strong> to test reachability to DetectifAI Platform.
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Security Policy Thresholds</div>
+          </div>
+          <div class="stages-breakdown-grid">
+            <div class="stage-pill">
+              <div class="stage-pill-title">Aletheia Synthetic Cutoff</div>
+              <div class="stage-pill-value">
+                <span class="tabular">0.50 Probability</span>
+                <span class="badge badge-critical">Strict</span>
+              </div>
+              <div class="stage-pill-detail">Audio scored &ge; 0.50 synthetic probability is classified as FAKE.</div>
+            </div>
+
+            <div class="stage-pill">
+              <div class="stage-pill-title">Eidos Biometric Match Cutoff</div>
+              <div class="stage-pill-value">
+                <span class="tabular">0.70 Match Score</span>
+                <span class="badge badge-high">High Security</span>
+              </div>
+              <div class="stage-pill-detail">Cosine voiceprint similarity &ge; 0.70 required for positive speaker match.</div>
+            </div>
+
+            <div class="stage-pill">
+              <div class="stage-pill-title">Challenge Liveness Protocol</div>
+              <div class="stage-pill-value">
+                <span>Automated ASR (Web Speech)</span>
+                <span class="badge badge-approved">Enabled</span>
+              </div>
+              <div class="stage-pill-detail">Speech recognition validated with minimum 65% token and phonetic overlap.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       ACCESSIBLE MODALS (<dialog>)
+       ==================================================================== -->
+
+  <!-- Modal 1: Create Threat Report (r/VoiceThreatNet) -->
+  <dialog id="modalThreatReport">
+    <div class="modal-header">
+      <div class="modal-title">Submit Threat Report to r/VoiceThreatNet</div>
+      <button class="btn-close-modal" onclick="closeModal('modalThreatReport')" aria-label="Close modal">&times;</button>
+    </div>
+    <form id="formSubmitThreatReport">
+      <input type="hidden" id="reportIncidentId">
+      
+      <div class="form-group">
+        <label class="form-label" for="reportTitle">Incident Title *</label>
+        <input type="text" id="reportTitle" class="form-control" required placeholder="e.g. ElevenLabs voice clone attempting $250k wire authorization">
+      </div>
+
+      <div class="grid-2" style="gap:10px; margin-bottom:12px;">
+        <div>
+          <label class="form-label" for="reportAttackType">Attack Type</label>
+          <select id="reportAttackType" class="form-select">
+            <option value="ai_clone">AI Synthetic Clone</option>
+            <option value="replay">Replay Attack</option>
+            <option value="human_impostor">Human Impostor</option>
+            <option value="unknown">Unknown</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="form-label" for="reportSeverity">Severity</label>
+          <select id="reportSeverity" class="form-select">
+            <option value="CRITICAL">CRITICAL</option>
+            <option value="HIGH" selected>HIGH</option>
+            <option value="MEDIUM">MEDIUM</option>
+            <option value="LOW">LOW</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="reportSummary">Incident Summary & Forensic Telemetry *</label>
+        <textarea id="reportSummary" class="form-textarea" rows="4" required placeholder="Describe acoustic artifacts, caller tactics, and detection telemetry (Safe metadata only, no raw audio or credentials)..."></textarea>
+      </div>
+
+      <div style="font-size:0.72rem; color:var(--text-muted); margin-bottom:14px;">
+        Notice: Submissions store safe forensic metadata and enter <em>Pending Review</em> status until verified by SOC moderators.
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:8px;">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modalThreatReport')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Publish Report</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Modal 2: Threat Report Detail & Moderator Actions -->
+  <dialog id="modalThreatDetail">
+    <div class="modal-header">
+      <div class="modal-title" id="detailModalTitle">Threat Report Details</div>
+      <button class="btn-close-modal" onclick="closeModal('modalThreatDetail')" aria-label="Close modal">&times;</button>
+    </div>
+    <div id="detailModalBody"></div>
+  </dialog>
+
+  <!-- Modal 3: Audit JSON Inspector -->
+  <dialog id="modalAuditJson">
+    <div class="modal-header">
+      <div class="modal-title">Raw Telemetry & Metadata Inspector</div>
+      <button class="btn-close-modal" onclick="closeModal('modalAuditJson')" aria-label="Close modal">&times;</button>
+    </div>
+    <pre id="auditJsonContent" class="mono" style="background:var(--bg-subtle); border:1px solid var(--border-subtle); padding:14px; border-radius:var(--radius-xs); font-size:0.75rem; max-height:380px; overflow:auto; color:var(--text-secondary);"></pre>
+    <div style="display:flex; justify-content:flex-end; margin-top:12px;">
+      <button type="button" class="btn btn-secondary" onclick="closeModal('modalAuditJson')">Close</button>
+    </div>
+  </dialog>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
