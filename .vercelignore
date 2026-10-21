@@ -1,0 +1,14 @@
+.venv
+venv
+.pytest_cache
+tests
+.env
+.env.local
+*.env
+*.db
+*.db.backup
+*.backup
+*.bak
+alibi.db
+__pycache__
+*.py[cod]
